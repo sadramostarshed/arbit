@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-from sms_ir import SmsIr
+
 import http
 import json
 import schedule
@@ -9,11 +9,7 @@ import time
 
 def job():
     # Your script logic here
-    sms_ir = SmsIr(
-    api_key="u8hWMtgzFUog4A4wJfwgJz6ojgg2fPA6jRW690qpl8lClcEnSFhoiLlXKRn2mM2W"
-        ,
-        linenumber=30007487128939
-    )
+  
 
     # Fetch the webpage
     r = requests.get('https://tokenbaz.com/')
@@ -34,7 +30,7 @@ def job():
     available_money =150
 
     # Calculate allowedvar in toman
-    allowedvar=500
+    allowedvar=300
 
 
     for i in res:
@@ -106,17 +102,33 @@ def job():
     print(final_list)
 
     if final_list :
-        smstext=""
+        smstext="تتر"
         for i in final_list:
                 text=str({i[0][0]:i[1][0]})
                 smstext=smstext+"."+text
         print(smstext)
         
-        sms_ir.send_sms(
-        number="09164057756",
-        message=text,
-        linenumber=30007487128939,
-    )
+        
+        conn = http.client.HTTPSConnection("api.sms.ir")
+        payload = json.dumps({
+        "lineNumber": 30007487128939,
+        "messageText": smstext,
+        "mobiles": [
+          "09164057756"
+          
+        ],
+        "sendDateTime": None
+        })
+        headers = {
+        'X-API-KEY': "u8hWMtgzFUog4A4wJfwgJz6ojgg2fPA6jRW690qpl8lClcEnSFhoiLlXKRn2mM2W",
+        'Content-Type': 'application/json'
+      }
+        conn.request("POST", "/v1/send/bulk", payload, headers)
+        res = conn.getresponse()
+        data = res.read()
+        print(data.decode("utf-8"))
+
+      
 
 schedule.every(1).minutes.do(job)
 
